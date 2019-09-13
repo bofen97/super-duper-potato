@@ -1,23 +1,15 @@
-from wrapper import ActionWrapper,ObservationWrapper,Wrapper
-
 from model import PolicyModel
 from acer import ACER_unTRoptimize
-
 from agent import Agent
-
-
 import numpy as np
-
 from collections import defaultdict
 from utils import gen_qret
-
 import parl
 import queue
 import threading
-
 from utils import ReplayMemory
 from copy import deepcopy
-from utils import test,reward_shape
+from utils import test,reward_shaping
 
 @parl.remote_class
 class Actor(object):
@@ -50,7 +42,7 @@ class Actor(object):
         _obs_next_,_,_,info = self.env.step(_act_)
 
 
-        mem_rew =reward_shape(info,self.env)
+        mem_rew =reward_shaping(self.env,info,True)
         mem_act = deepcopy(_act_)
         
         
@@ -196,16 +188,11 @@ class learner(object):
 
 if __name__ == "__main__":
     from config import acer_config
-    from utils import plot_durations
     l = learner(acer_config)
     c = 0
-    plots= []
     while not l.should_done():
         c += 1
-        if c % 500 ==0:
-            acc = test(l.agent,3600,True)
-            plots.append(acc)
-            plot_durations(plots)
+        if c % 100 ==0:
             l.agent.save('./model.ckpt')
             
         l.step()

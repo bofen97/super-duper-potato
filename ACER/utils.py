@@ -91,57 +91,61 @@ class ReplayMemory(object):
 
 
 
-import matplotlib.pyplot as plt
-def plot_durations(episode_durations):
+
+def reward_shaping(env,info,use_shaping = False):
+    base_rew = -(info['time_consume'] + 0.01 * info['energy_consume'] + 100 * info['given_up_persons'])*1e-4 
+    other_rews = []
+    for state in env.env.state.ElevatorStates:
+        if state.Velocity  >= state.MaximumSpeed * 0.29 - 5e-3 or \
+            state.Velocity  <= state.MaximumSpeed * 0.29 + 5e-3:
+            rew =5e-4
+        else:
+            rew = -5e-4
+
+        
+        other_rews.append(rew)
     
-    plt.figure(2)
-    plt.clf()
-    plt.title('training              :)  ')
-    plt.xlabel('steps')
-    plt.ylabel('3600 steps acc reward')
-    plt.plot(episode_durations)
-    plt.pause(0.001)  # pause a bit so that plots are updated
+    ret = []
+    for i in range(4):    
+        if use_shaping:    
+            ret.append(base_rew +other_rews[i] )
+        else:
+            ret.append(base_rew)
+    return ret
+
+
 
 from rlschool import LiftSim
-from wrapper import Wrapper,ActionWrapper,ObservationWrapper
 
+from wrapper import  ObservationWrapper,ActionWrapper,Wrapper
 
 env = ObservationWrapper(ActionWrapper(Wrapper(LiftSim())))
 
-def test(agent,steps,render):
-    acc = 0.
-    env.reset()
-    for  _ in range(steps):
+def test(agent,steps,render = False):
+    c=0.
+    obs = env.reset()
+    for t in range(steps):
         if render:    
             env.render()
-        ob  = env.state
-        
-        act = agent.predict(ob)
-        
-        ob,r,_,_ = env.step(act)
-        acc +=r
-    return acc
+        obs = env.state
+        act = agent.predict(obs)
+        _,r,_,_ = env.step(act)
+        print(t,c)
+        c+= r
+    return c
 
 
 
 
-
-
-
-def reward_shape(info,env):
-    rewards_base = -(info['time_consume']*10.0+  0.01 * info['energy_consume'] + \
-                                     200.0 * info['given_up_persons'])*1e-4
-    elevator_states = env.env.state.ElevatorStates
-    elevator_weights= []
-    elevator_speeds=[]
-    elevator_numfloors=[]
-    for state in elevator_states:
-        elevator_weights.append(-(state.MaximumLoad - state.LoadWeight) *1e-6)
-        elevator_speeds.append((state.MaximumSpeed - state.Velocity) *1e-3)
-        elevator_numfloors.append(    -   np.abs(state.MaximumFloor/2.0  - state.Floor)*0 )
-    
-    ret =[]
-    for i in range(4):
-        ret.append(rewards_base + elevator_speeds[i] + elevator_weights[i]+ elevator_numfloors[i])
-
-    return ret
+from matplotlib import pyplot as plt
+def plot_results(results):
+    mean_rews = results['meanr']
+    mean_adv = results['meanadv']
+    mean_v   = results['meanvalue']
+    xs = range(len(mean_rews))
+    plt.plot(xs, mean_rews, label='mean_r_per_batch')
+    plt.plot(xs,mean_adv,label='mean_adv_per_batch')
+    plt.plot(xs,mean_v,label='mean_value_per_batch')
+    plt.title("results")
+    plt.legend()
+    plt.show()
