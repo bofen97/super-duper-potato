@@ -3,11 +3,6 @@ import numpy as np
 
 def gen_qret(v,r,q_i,rho_i):
     rho_bar = np.array([c if c <1.0 else 1.0 for c in rho_i ])
-
-    v = v.reshape(-1,4)
-    r = r.reshape(-1,4)
-    q_i = q_i.reshape(-1,4)
-    rho_i = rho_i.reshape(-1,4)
     
     v_final = v[-1]
     qret = v_final
@@ -16,7 +11,6 @@ def gen_qret(v,r,q_i,rho_i):
         qret = r[i] + 0.99 * qret
         qrets[i]=qret
         qret  = (qret -q_i[i]) *rho_bar[i]  + v[i]
-    qrets = qrets.reshape(-1)
     return qrets
 
 def logp(logits,actions):
