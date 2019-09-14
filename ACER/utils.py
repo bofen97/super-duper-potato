@@ -3,6 +3,12 @@ import numpy as np
 
 def gen_qret(v,r,q_i,rho_i):
     rho_bar = np.array([c if c <1.0 else 1.0 for c in rho_i ])
+
+    v = v.reshape(-1,4)
+    r = r.reshape(-1,4)
+    q_i = q_i.reshape(-1,4)
+    rho_i = rho_i.reshape(-1,4)
+    
     v_final = v[-1]
     qret = v_final
     qrets = np.zeros_like(v)
@@ -10,6 +16,7 @@ def gen_qret(v,r,q_i,rho_i):
         qret = r[i] + 0.99 * qret
         qrets[i]=qret
         qret  = (qret -q_i[i]) *rho_bar[i]  + v[i]
+    qrets = qrets.reshape(-1)
     return qrets
 
 def logp(logits,actions):
@@ -130,7 +137,6 @@ def test(agent,steps,render = False):
         obs = env.state
         act = agent.predict(obs)
         _,r,_,_ = env.step(act)
-        print(t,c)
         c+= r
     return c
 
@@ -149,3 +155,15 @@ def plot_results(results):
     plt.title("results")
     plt.legend()
     plt.show()
+
+
+def plot_scores(scores):
+    plt.figure(2)
+    plt.clf()
+    plt.title('                               :)                         ')
+    plt.xlabel('3600 steps per episode')
+    plt.ylabel('score')
+    plt.plot(scores)
+    plt.pause(0.00001)
+
+ 

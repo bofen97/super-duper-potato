@@ -38,7 +38,7 @@ class Actor(object):
         _obs_next_,_,_,info = self.env.step(_act_)
 
 
-        mem_rew =reward_shaping(self.env,info,True)
+        mem_rew =reward_shaping(self.env,info,False)
         mem_act = deepcopy(_act_)
         
         

@@ -102,10 +102,15 @@ class learner(object):
 
 if __name__ == "__main__":
     from config import acer_config
+    from utils import plot_scores,test
     l = learner(acer_config)
     c = 0
+    scores = []
     while not l.should_done():
         c += 1
-        if c % 100 ==0:
+        if c % 1000 ==0:
+            r=test(l.agent,3600)
+            scores.append(r)
+            plot_scores(scores)
             l.agent.save('./model.ckpt')
         l.step()
