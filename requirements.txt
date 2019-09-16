@@ -1,3 +1,0 @@
-rlschool
-paddlepaddle-gpu==1.5.1.post97
-parl

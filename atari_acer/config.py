@@ -1,0 +1,14 @@
+config = {}
+config['qcoeff']=0.5
+config['start_lr'] = 0.001
+config['max_sample_steps'] = int(1e7)
+config['entropy_coeff_scheduler'] = [(0,-0.01)]
+config['env_name'] = 'PongNoFrameskip-v4'
+config['env_num'] = 5
+config['env_dim'] = 84
+config['memory_size'] = 50000
+config['sample_batch_steps'] = 20
+config['master_address'] = 'localhost:6006'
+config['actor_num'] = 5
+config['get_remote_metrics_interval'] = 10
+config['log_metrics_interval_s'] = 10
