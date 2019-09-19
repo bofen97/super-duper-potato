@@ -9,7 +9,7 @@ config = {
     'env_dim': 84,
 
     #==========  actor config ==========
-    'actor_num': 12, 
+    'actor_num': 5, 
     'env_num': 5,
     'sample_batch_steps': 20,
 
@@ -20,6 +20,7 @@ config = {
 
     # start learning rate
     'start_lr': 0.001,
+    'l2_reg':0.01,
 
     # coefficient of policy entropy adjustment schedule: (train_step, coefficient)
     'entropy_coeff_scheduler': [(0, -0.01)],
