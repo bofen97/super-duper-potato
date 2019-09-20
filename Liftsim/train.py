@@ -121,7 +121,6 @@ class Learner(object):
         return self.sample_total_steps >= self.config['max_sample_steps']
 
 if __name__ == "__main__":
-
     from config import config
     learner = Learner(config)
     assert config['log_metrics_interval_s']>0
@@ -131,17 +130,3 @@ if __name__ == "__main__":
             learner.step()
         learner.log_metrics()
         learner.agent.save('./model.ckpt')
-
-
-
-        
-
-
-    
-
-
-
-
-
-
-

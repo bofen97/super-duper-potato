@@ -17,8 +17,8 @@ config = {
     'lambda': 1.0,  # GAE
 
     # start learning rate
-    'start_lr': 0.0005,
-    'l2_reg':0.0001,
+    'start_lr': 5e-5,
+    'l2_reg':0.0,
 
     # coefficient of policy entropy adjustment schedule: (train_step, coefficient)
     'entropy_coeff_scheduler': [(0, -0.01)],
