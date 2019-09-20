@@ -9,7 +9,7 @@ config = {
     'env_dim': 84,
 
     #==========  actor config ==========
-    'actor_num': 12, 
+    'actor_num':5, 
     'env_num': 5,
     'sample_batch_steps': 20,
 

@@ -1,20 +1,18 @@
 
 config = {
 
+    #========== algorithms =============
+    'algorithm':'a2c', # default alg.
     #==========  remote config ==========
     'master_address': 'localhost:6006',
 
-    #==========  env config ==========
-    'env_name': 'PongNoFrameskip-v4',
-    'env_dim': 84,
-
     #==========  actor config ==========
-    'actor_num': 5, 
+    'actor_num':5, 
     'env_num': 5,
-    'sample_batch_steps': 20,
+    'sample_batch_steps': 5,
 
     #==========  learner config ==========
-    'max_sample_steps': int(1e7),
+    'max_sample_steps': int(10e8),
     'gamma': 0.99,
     'lambda': 1.0,  # GAE
 
