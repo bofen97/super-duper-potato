@@ -1,5 +1,26 @@
 import numpy as np
 import scipy
+
+def test(agent):
+    from wrapper import Wrapper,ActionWrapper,ObservationWrapper
+    from rlschool import LiftSim
+    mansion_env = LiftSim()
+    mansion_env = Wrapper(mansion_env)
+    mansion_env = ActionWrapper(mansion_env)
+    mansion_env = ObservationWrapper(mansion_env)
+
+    obs = mansion_env.reset()
+    rs=0.0
+    for i in range(28800*6*3):
+        mansion_env.render()
+        acts = agent.predict(obs)
+        obs,r,_,_ = mansion_env.step([int(act) for act in acts])
+        rs+= r
+    print('test  28800 * 6 * 3  steps reward mean {}'.format(rs/3.))
+
+        
+
+
 def calc_gae_for_multi_agent(concat_rews,concat_values,next_values,gamma,lam):
     baseline  = np.append(concat_values,next_values)
     tds  = concat_rews + gamma*baseline[4:] - baseline[:-4]

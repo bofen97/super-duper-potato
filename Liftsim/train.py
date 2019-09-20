@@ -122,8 +122,6 @@ class Learner(object):
 
 if __name__ == "__main__":
 
-
-
     from config import config
     learner = Learner(config)
     assert config['log_metrics_interval_s']>0
@@ -132,7 +130,7 @@ if __name__ == "__main__":
         while time.time() - start < config['log_metrics_interval_s']:
             learner.step()
         learner.log_metrics()
-
+        learner.agent.save('./model.ckpt')
 
 
 
