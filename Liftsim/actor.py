@@ -6,7 +6,7 @@ from wrapper import Wrapper,ActionWrapper,ObservationWrapper
 from rlschool import LiftSim
 from env_vector import VectorEnv
 from collections import defaultdict
-from utils import calc_gae_for_multi_agent
+from utils import calc_gae
 import parl
 @parl.remote_class
 class Actor(object):
@@ -16,6 +16,7 @@ class Actor(object):
         envs = []
         for i in range(self.config['env_num']):
             mansion_env = LiftSim()
+            mansion_env._config._current_time = 60 *2 * (i+1) *4
             mansion_env = Wrapper(mansion_env)
             mansion_env = ActionWrapper(mansion_env)
             mansion_env = ObservationWrapper(mansion_env)
@@ -64,16 +65,12 @@ class Actor(object):
 
                 if sample_step == self.config['sample_batch_steps'] -1:
                     #calc advantage and value target
-                    next_obs_per_env =   next_obs_batch[env_id]
-                    next_values              = self.agent.value(next_obs_per_env)
-
-
                     rews                = env_sample_data[env_id]['rew']
                     values             = env_sample_data[env_id]['value']
                     concat_values = np.concatenate(values)
                     concat_rews = np.concatenate(rews)
 
-                    advantages = calc_gae_for_multi_agent(concat_rews,concat_values,next_values,self.config['gamma'],\
+                    advantages = calc_gae(concat_rews,concat_values,self.config['gamma'],\
                                                                                                 self.config['lambda'])
                     
                 

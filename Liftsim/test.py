@@ -11,8 +11,11 @@ if __name__ == "__main__":
     mansion_env = ObservationWrapper(mansion_env)
 
     mansion_env.reset()
-    for i in range(28800*6*3):
+    rs =0.
+    for i in range(28800*6):
         mansion_env.render()
         acts = learner.agent.predict(mansion_env.state)
         acts = [int(a) for a in acts]
-        _,r_,_,_ = mansion_env.step(acts)
+        _,r,_,_ = mansion_env.step(acts)
+        rs+=r
+    print(rs)
