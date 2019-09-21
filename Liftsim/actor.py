@@ -4,20 +4,21 @@ from agent import Agent
 import numpy as np
 from wrapper import Wrapper,ActionWrapper,ObservationWrapper
 from rlschool import LiftSim
-from parl.env.vector_env import VectorEnv
+from env_vector import VectorEnv
 from collections import defaultdict
 from utils import calc_gae_for_multi_agent
 from utils import calc_gae_for_multi_agent_2
 import parl
 @parl.remote_class
 class Actor(object):
-    def __init__(self,config):
+    def __init__(self,config,hour):
 
         self.config = config
         envs = []
         for i in range(self.config['env_num']):
             mansion_env = LiftSim()
-            mansion_env.seed(i*10)
+            mansion_env._config._current_time = hour * 60 * 2  *2 
+
             mansion_env = Wrapper(mansion_env)
             mansion_env = ActionWrapper(mansion_env)
             mansion_env = ObservationWrapper(mansion_env)
@@ -55,12 +56,13 @@ class Actor(object):
             actions_batch_reshape_int=[[int(action) for action in actions] for actions in actions_batch_reshape]
             # and stor to sample data
             next_obs_batch,rewards,_,_ =self.vec_env.step(actions_batch_reshape_int)
-            rewads_batch = [ [reward]*4 for reward in rewards]
+
+            rewards_batch = [ [reward]*4 for reward in rewards]
 
             for env_id in range(self.config['env_num']):
                 env_sample_data[env_id]['obs'].append(self.obs_batch[env_id])
                 env_sample_data[env_id]['act'].append(actions_batch_reshape[env_id])
-                env_sample_data[env_id]['rew'].append(rewads_batch[env_id])
+                env_sample_data[env_id]['rew'].append(rewards_batch[env_id])
                 env_sample_data[env_id]['value'].append(value_batch_reshape[env_id])
 
                 if sample_step == self.config['sample_batch_steps'] -1:
@@ -81,7 +83,6 @@ class Actor(object):
                                                                                              self.config['lambda'])
                     
                     value_targets = advantages + concat_values
-
                     sample_data['obs'].extend(env_sample_data[env_id]['obs'])
                     sample_data['act'].extend(env_sample_data[env_id]['act'])
                     sample_data['adv'].extend(advantages)

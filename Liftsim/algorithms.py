@@ -113,7 +113,7 @@ class ppo(parl.Algorithm):
         policy_entropy = fluid.layers.reduce_sum(policy_entropy)
         
         
-        # def total loss , we using minimize optimizer 
+        # def total loss ,  using minimize optimizer 
         
         # we want maxmize policy entropy and policy loss ,so using entropy coeff < 0  and poliy loss * -1.0
         

@@ -63,14 +63,14 @@ class Learner(object):
             self.remote_count += 1
 
             remote_thread = threading.Thread(
-                target=self.run_remote_sample,args=(params_queue,)
+                target=self.run_remote_sample,args=(params_queue,_)
             )
 
             remote_thread.setDaemon(True)
             remote_thread.start()
         self.start_time = time.time()
-    def run_remote_sample(self,params_queue):
-        remote_actor = Actor(self.config)
+    def run_remote_sample(self,params_queue,hour):
+        remote_actor = Actor(self.config,hour = hour)
         while True:
             latest_params = params_queue.get()
             remote_actor.set_weights(latest_params)
@@ -107,7 +107,8 @@ class Learner(object):
         if self.start_time is None:
             return
         metric = {
-            'sample_reward_per_step':self.rewards_sum_stat.mean,
+            'sample_reward_per_step_mean':self.rewards_sum_stat.mean,
+            'sample_reward_per_step_max':self.rewards_sum_stat.max,
             'pi_loss':self.pi_loss_stat.mean,
             'total_loss':self.total_loss_stat.mean,
             'vf_loss':self.vf_loss_stat.mean,
@@ -123,25 +124,24 @@ class Learner(object):
 if __name__ == "__main__":
     from config import config
     learner = Learner(config)
-    learner.agent.restore('./model.ckpt')
+    """learner.agent.restore('./model.ckpt')
     mansion_env = LiftSim()
     mansion_env = Wrapper(mansion_env)
     mansion_env = ActionWrapper(mansion_env)
     mansion_env = ObservationWrapper(mansion_env)
-    obs = mansion_env.reset()
-    rs=0
-    for i in range(28800*6):
-        #mansion_env.render()
-        acts = learner.agent.predict(obs)
-        acts = [int(act) for act in acts]
 
-        obs,r,_,_ = mansion_env.step(acts)
-        rs+=r
-    print(rs)
-    """assert config['log_metrics_interval_s']>0
+    mansion_env.reset()
+    for i in range(28800):
+        mansion_env.render()
+        acts = learner.agent.predict(mansion_env.state)
+        acts = [int(a) for a in acts]
+        _,r_,_,_ = mansion_env.step(acts)"""
+
+    
+    assert config['log_metrics_interval_s']>0
     while not learner.should_stop():
         start = time.time()
         while time.time() - start < config['log_metrics_interval_s']:
             learner.step()
         learner.log_metrics()
-        learner.agent.save('./model.ckpt')"""
+        learner.agent.save('./model.ckpt')

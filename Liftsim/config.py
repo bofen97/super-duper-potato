@@ -7,7 +7,7 @@ config = {
     'master_address': 'localhost:6006',
 
     #==========  actor config ==========
-    'actor_num':5, 
+    'actor_num':12, 
     'env_num': 5,
     'sample_batch_steps': 5,
 
@@ -17,7 +17,7 @@ config = {
     'lambda': 1.0,  # GAE
 
     # start learning rate
-    'start_lr': 5e-5,
+    'start_lr': 1e-5,
     'l2_reg':0.0,
 
     # coefficient of policy entropy adjustment schedule: (train_step, coefficient)
