@@ -123,10 +123,25 @@ class Learner(object):
 if __name__ == "__main__":
     from config import config
     learner = Learner(config)
-    assert config['log_metrics_interval_s']>0
+    learner.agent.restore('./model.ckpt')
+    mansion_env = LiftSim()
+    mansion_env = Wrapper(mansion_env)
+    mansion_env = ActionWrapper(mansion_env)
+    mansion_env = ObservationWrapper(mansion_env)
+    obs = mansion_env.reset()
+    rs=0
+    for i in range(28800*6):
+        #mansion_env.render()
+        acts = learner.agent.predict(obs)
+        acts = [int(act) for act in acts]
+
+        obs,r,_,_ = mansion_env.step(acts)
+        rs+=r
+    print(rs)
+    """assert config['log_metrics_interval_s']>0
     while not learner.should_stop():
         start = time.time()
         while time.time() - start < config['log_metrics_interval_s']:
             learner.step()
         learner.log_metrics()
-        learner.agent.save('./model.ckpt')
+        learner.agent.save('./model.ckpt')"""

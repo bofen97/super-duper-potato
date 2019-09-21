@@ -25,10 +25,7 @@ class MLP(parl.Model):
         return values
     def policy_and_value(self,x):
         
-        """
-        use for algorithm sampling .
         
-        """
         x = self.fc1(x)
         x = self.fc2(x)
         policy_logits = self.policy_fc(x)   
