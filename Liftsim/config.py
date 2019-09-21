@@ -7,12 +7,12 @@ config = {
     'master_address': 'localhost:6006',
 
     #==========  actor config ==========
-    'actor_num':12, 
+    'actor_num':5, 
     'env_num': 5,
     'sample_batch_steps': 5,
 
     #==========  learner config ==========
-    'max_sample_steps': int(1e9),
+    'max_sample_steps': int(1e10),
     'gamma': 0.99,
     'lambda': 1.0,  # GAE
 

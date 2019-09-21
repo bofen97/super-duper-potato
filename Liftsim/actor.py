@@ -7,18 +7,15 @@ from rlschool import LiftSim
 from env_vector import VectorEnv
 from collections import defaultdict
 from utils import calc_gae_for_multi_agent
-from utils import calc_gae_for_multi_agent_2
 import parl
 @parl.remote_class
 class Actor(object):
-    def __init__(self,config,hour):
+    def __init__(self,config):
 
         self.config = config
         envs = []
         for i in range(self.config['env_num']):
             mansion_env = LiftSim()
-            mansion_env._config._current_time = hour * 60 * 2  *2 
-
             mansion_env = Wrapper(mansion_env)
             mansion_env = ActionWrapper(mansion_env)
             mansion_env = ObservationWrapper(mansion_env)
@@ -76,11 +73,10 @@ class Actor(object):
                     concat_values = np.concatenate(values)
                     concat_rews = np.concatenate(rews)
 
-                    """advantages = calc_gae_for_multi_agent(concat_rews,concat_values,next_values,self.config['gamma'],\
+                    advantages = calc_gae_for_multi_agent(concat_rews,concat_values,next_values,self.config['gamma'],\
                                                                                                 self.config['lambda'])
-                    """
-                    advantages = calc_gae_for_multi_agent_2(concat_rews,concat_values,self.config['gamma'],\
-                                                                                             self.config['lambda'])
+                    
+                
                     
                     value_targets = advantages + concat_values
                     sample_data['obs'].extend(env_sample_data[env_id]['obs'])

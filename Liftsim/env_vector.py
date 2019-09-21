@@ -22,9 +22,9 @@ class VectorEnv(object):
             obs, _, done, info = self.envs[env_id].step(actions[env_id])
 
             reward = - (
-            100*info['time_consume'] + 
+            info['time_consume'] + 
             5e-4 * info['energy_consume'] +
-            300 * info['given_up_persons']) * 1e-4
+            500 * info['given_up_persons']) * 1e-4
             
             if done:
                 obs = self.envs[env_id].reset()
