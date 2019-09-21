@@ -1,6 +1,6 @@
 import time
 from config import config
-from train import Learner
+from Learner import Learner
 if __name__ == "__main__":
     learner = Learner(config)
     assert config['log_metrics_interval_s']>0

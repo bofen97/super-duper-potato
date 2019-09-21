@@ -1,5 +1,5 @@
 from config import config
-from train import Learner
+from Learner import Learner
 from wrapper import Wrapper,ActionWrapper,ObservationWrapper
 from rlschool import LiftSim
 if __name__ == "__main__":
