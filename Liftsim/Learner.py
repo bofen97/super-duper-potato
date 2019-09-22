@@ -27,14 +27,14 @@ class Learner(object):
         model=MLP(self.config['act_dim'])
         if self.config['algorithm'] =='a2c':
             print("algorithm is a2c .  ") 
-            algorithm= a2c(model,self.config)
+            self.algorithm= a2c(model,self.config)
         elif self.config['algorithm'] =='ppo':
             print("algorithm is ppo . ")
-            algorithm= ppo(model,self.config)
+            self.algorithm= ppo(model,self.config)
         else:
-            algorithm = None
+            self.algorithm = None
 
-        self.agent = Agent(algorithm,self.config)
+        self.agent = Agent(self.algorithm,self.config)
         self.total_loss_stat = WindowStat(100)
         self.pi_loss_stat = WindowStat(100)
         self.vf_loss_stat = WindowStat(100)
@@ -95,6 +95,8 @@ class Learner(object):
             total_loss,pi_loss,vf_loss,entropy,lr,_ = self.agent.learn(
                 train_batch['obs'],train_batch['act'],train_batch['adv'],
                 train_batch['vtag'])
+        if self.config['algorithm'] == 'ppo':
+            self.algorithm.sync_old_policy()
         self.rewards_sum_stat.add(np.sum(train_batch['rews'])/(self.config['actor_num']*
                                                                                                                                 self.config['env_num']*
                                                                                                                                 self.config['sample_batch_steps']*4.0 ))

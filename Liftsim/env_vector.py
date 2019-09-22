@@ -23,8 +23,8 @@ class VectorEnv(object):
 
             reward = - (
             info['time_consume'] + 
-            0.01* info['energy_consume'] +
-            100 * info['given_up_persons']) * 1e-4
+            5e-4* info['energy_consume'] +
+            300 * info['given_up_persons']) * 1e-4
             
             if done:
                 obs = self.envs[env_id].reset()
