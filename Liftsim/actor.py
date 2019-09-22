@@ -16,7 +16,6 @@ class Actor(object):
         envs = []
         for i in range(self.config['env_num']):
             mansion_env = LiftSim()
-            mansion_env._config._current_time = 60 *2 * (i+1) *4
             mansion_env = Wrapper(mansion_env)
             mansion_env = ActionWrapper(mansion_env)
             mansion_env = ObservationWrapper(mansion_env)
