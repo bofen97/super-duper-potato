@@ -12,7 +12,7 @@ config = {
     'sample_batch_steps': 5,
 
     #==========  learner config ==========
-    'max_sample_steps': int(1e10),
+    'max_sample_steps': int(15e8),
     'gamma': 0.99,
     'lambda': 1.0,  # GAE
 
