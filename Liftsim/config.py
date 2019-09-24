@@ -12,13 +12,13 @@ config = {
     'sample_batch_steps': 5,
 
     #==========  learner config ==========
-    'max_sample_steps': int(15e8),
-    'gamma': 0.99,
+    'max_sample_steps': int(5e9),
+    'gamma': 0.9995,
     'lambda': 1.0,  # GAE
 
     # start learning rate
-    'start_lr':5e-5,
-    'l2_reg':0.0,
+    'start_lr':1e-5,
+    'l2_reg':1e-4,
 
     # coefficient of policy entropy adjustment schedule: (train_step, coefficient)
     'entropy_coeff_scheduler': [(0, -0.01)],
