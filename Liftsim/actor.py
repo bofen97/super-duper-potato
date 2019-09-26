@@ -67,6 +67,7 @@ class Actor(object):
                     sample_data['adv'].extend(advantage)
                     sample_data['vtag'].extend(value_target)
                     sample_data['rew'].extend(reward)
+                    sample_data['value'].extend(value)
             self.obs_batch = next_obs_batch
         
         advs = np.array(sample_data['adv'])
@@ -75,6 +76,7 @@ class Actor(object):
             'obs':np.stack( sample_data['obs']),
             'act':np.concatenate(sample_data['act']),
             'rew': np.array(sample_data['rew']),
+            'value':np.array(sample_data['value']),
             'adv': advs,
             'vtag':np.array(sample_data['vtag']) }
 

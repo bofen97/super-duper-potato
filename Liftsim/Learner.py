@@ -42,6 +42,7 @@ class Learner(object):
         self.entropy_stat = WindowStat(100)
         self.lr = None
         self.rewards_sum_stat = WindowStat(100)
+        self.value_sum_stat = WindowStat(100)
 
         self.writer = SummaryWriter()
         self.learn_time_stat = TimeStat(100)
@@ -98,9 +99,9 @@ class Learner(object):
                 train_batch['vtag'])
         if self.config['algorithm'] == 'ppo':
             self.algorithm.sync_old_policy()
-        self.rewards_sum_stat.add(np.sum(train_batch['rew'])/(self.config['actor_num']*
-                                                                                                                                self.config['env_num']*
-                                                                                                                                self.config['sample_batch_steps'] ))
+        normal=self.config['actor_num']*self.config['env_num']*self.config['sample_batch_steps']
+        self.value_sum_stat.add(np.sum(train_batch['value'])/normal)
+        self.rewards_sum_stat.add(np.sum(train_batch['rew'])/normal)
         self.total_loss_stat.add(total_loss)
         self.pi_loss_stat.add(pi_loss)
         self.vf_loss_stat.add(vf_loss)
@@ -111,6 +112,7 @@ class Learner(object):
             return
         metric = {
             'sample_reward_per_step_mean':self.rewards_sum_stat.mean,
+            'sample_value_per_step':self.value_sum_stat.mean,
             'pi_loss':self.pi_loss_stat.mean,
             'total_loss':self.total_loss_stat.mean,
             'vf_loss':self.vf_loss_stat.mean,
