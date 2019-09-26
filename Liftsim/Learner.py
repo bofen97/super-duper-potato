@@ -100,7 +100,7 @@ class Learner(object):
             self.algorithm.sync_old_policy()
         self.rewards_sum_stat.add(np.sum(train_batch['rews'])/(self.config['actor_num']*
                                                                                                                                 self.config['env_num']*
-                                                                                                                                self.config['sample_batch_steps']*4.0 ))
+                                                                                                                                self.config['sample_batch_steps'] ))
         self.total_loss_stat.add(total_loss)
         self.pi_loss_stat.add(pi_loss)
         self.vf_loss_stat.add(vf_loss)
