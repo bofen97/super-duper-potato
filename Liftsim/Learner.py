@@ -98,7 +98,7 @@ class Learner(object):
                 train_batch['vtag'])
         if self.config['algorithm'] == 'ppo':
             self.algorithm.sync_old_policy()
-        self.rewards_sum_stat.add(np.sum(train_batch['rews'])/(self.config['actor_num']*
+        self.rewards_sum_stat.add(np.sum(train_batch['rew'])/(self.config['actor_num']*
                                                                                                                                 self.config['env_num']*
                                                                                                                                 self.config['sample_batch_steps'] ))
         self.total_loss_stat.add(total_loss)
