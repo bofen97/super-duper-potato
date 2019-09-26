@@ -9,12 +9,14 @@ if __name__ == "__main__":
     mansion_env = Wrapper(mansion_env)
     mansion_env = ActionWrapper(mansion_env)
     mansion_env = ObservationWrapper(mansion_env)
-    mansion_env.reset()
+    obs=mansion_env.reset()
     rs =0.
     for i in range(28800*6):
-        #mansion_env.render()
-        acts ,_= learner.agent.sample(mansion_env.state)
+        mansion_env.render()
+        obs = obs.reshape(1,-1)
+
+        acts= learner.agent.predict(obs)
         acts = [int(a) for a in acts]
-        _,r,_,_ = mansion_env.step(acts)
+        obs,r,_,_ = mansion_env.step(acts)
         rs+=r
     print(rs)
