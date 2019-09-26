@@ -20,15 +20,17 @@ class Agent(parl.Agent):
         
         feed = {'obs' : obs.astype('float32')}
         
-        acts,values = self.fluid_executor.run(self.sample_program,feed=feed,fetch_list = [self.sample_actions, \
+        sample_acts,values = self.fluid_executor.run(self.sample_program,feed=feed,fetch_list = [self.sample_acts, \
                                                                            self.sample_values])
-        return acts,values
+
+    
+        return sample_acts,values
     def predict(self,obs):
         
         feed = {'obs' : obs.astype('float32')}
         
-        acts = self.fluid_executor.run(self.predict_program,feed=feed,fetch_list = [self.predict_acts])[0]
-        return acts
+        predict_acts = self.fluid_executor.run(self.predict_program,feed=feed,fetch_list = [self.predict_acts])[0]
+        return predict_acts
     def value(self,obs):
         
         feed = {'obs' : obs.astype('float32')}
@@ -63,7 +65,7 @@ class Agent(parl.Agent):
         with fluid.program_guard(self.sample_program):
             
             obs = fluid.layers.data('obs',self.obs_shape,'float32')
-            self.sample_actions, self.sample_values = self.algorithm.sample(obs)
+            self.sample_acts, self.sample_values = self.algorithm.sample(obs)
             
         with fluid.program_guard(self.predict_program):
             obs = fluid.layers.data('obs',self.obs_shape,'float32')

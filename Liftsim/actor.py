@@ -6,24 +6,23 @@ from wrapper import Wrapper,ActionWrapper,ObservationWrapper
 from rlschool import LiftSim
 from env_vector import VectorEnv
 from collections import defaultdict
-from utils import calc_gae
+from parl.utils import calc_gae
 import parl
 @parl.remote_class
 class Actor(object):
     def __init__(self,config):
-
         self.config = config
         envs = []
-        for i in range(self.config['env_num']):
+        for id_ in range(self.config['env_num']):
             mansion_env = LiftSim()
             mansion_env = Wrapper(mansion_env)
             mansion_env = ActionWrapper(mansion_env)
             mansion_env = ObservationWrapper(mansion_env)
             envs.append(mansion_env)
         self.vec_env = VectorEnv(envs)
-
-        self.config['act_dim'] = mansion_env.action_space
-        self.config['obs_shape'] = (mansion_env.observation_space,)
+        self.elev_num = mansion_env.elevator_num
+        self.config['act_dim'] = mansion_env.action_space *self.elev_num
+        self.config['obs_shape'] = (mansion_env.observation_space*self.elev_num,)
         model=MLP(self.config['act_dim'])
         if self.config['algorithm'] =='a2c':
             print("algorithm is a2c .  ") 
@@ -37,63 +36,50 @@ class Actor(object):
         self.agent = Agent(algorithm,self.config)
         self.obs_batch = self.vec_env.reset()
     def sample(self):
+
         sample_data = defaultdict(list)
-
         env_sample_data = {}
-
         for env_id in range(self.config['env_num']):
             env_sample_data[env_id] = defaultdict(list)
-        
+
         for sample_step in range(self.config['sample_batch_steps']):
-            actions_batch,value_batch = self.agent.sample(np.concatenate(self.obs_batch))
-            # reshape value batch
-            value_batch_reshape = np.reshape(value_batch,(self.config['env_num'],-1))
-            #  use for get next step data .
-            actions_batch_reshape=np.reshape(actions_batch,(self.config['env_num'],-1))
-            actions_batch_reshape_int=[[int(action) for action in actions] for actions in actions_batch_reshape]
-            # and stor to sample data
-            next_obs_batch,rewards,_,_ =self.vec_env.step(actions_batch_reshape_int)
 
-            rewards_batch = [ [reward]*4 for reward in rewards]
-
+            sample_actions,value_batch= self.agent.sample(np.stack(self.obs_batch))
+            sample_actions = np.reshape(sample_actions,(-1,self.elev_num))
+            sample_actions_batch = [[int(action) for action in actions] for actions in sample_actions]
+            next_obs_batch,reward_batch,_,_ = self.vec_env.step(sample_actions_batch)
             for env_id in range(self.config['env_num']):
                 env_sample_data[env_id]['obs'].append(self.obs_batch[env_id])
-                env_sample_data[env_id]['act'].append(actions_batch_reshape[env_id])
-                env_sample_data[env_id]['rew'].append(rewards_batch[env_id])
-                env_sample_data[env_id]['value'].append(value_batch_reshape[env_id])
+                env_sample_data[env_id]['rew'].append(reward_batch[env_id])
+                env_sample_data[env_id]['act'].append(sample_actions_batch[env_id])
+                env_sample_data[env_id]['value'].append(value_batch[env_id])
 
-                if sample_step == self.config['sample_batch_steps'] -1:
-                    #calc advantage and value target
-                    rews                = env_sample_data[env_id]['rew']
-                    values             = env_sample_data[env_id]['value']
-                    concat_values = np.concatenate(values)
-                    concat_rews = np.concatenate(rews)
+                if sample_step  == self.config['sample_batch_steps'] -1:
+                    reward = env_sample_data[env_id]['rew']
+                    value = env_sample_data[env_id]['value']
+                    next_value = self.agent.value(np.expand_dims(next_obs_batch[env_id],axis=0) )
 
-                    advantages = calc_gae(concat_rews,concat_values,self.config['gamma'],\
-                                                                                                self.config['lambda'])
-                    
-                
-                    
-                    value_targets = advantages + concat_values
+                    advantage = calc_gae(reward,value,next_value,self.config['gamma'],self.config['lambda'])
+                    value_target = advantage + value
+        
                     sample_data['obs'].extend(env_sample_data[env_id]['obs'])
                     sample_data['act'].extend(env_sample_data[env_id]['act'])
-                    sample_data['adv'].extend(advantages)
-                    sample_data['vtag'].extend(value_targets)
-                    sample_data['rews'].extend(concat_rews)
+                    sample_data['adv'].extend(advantage)
+                    sample_data['vtag'].extend(value_target)
+                    sample_data['rew'].extend(reward)
             self.obs_batch = next_obs_batch
-        train_data={
-            'obs':np.concatenate(sample_data['obs']),
-            'act':np.concatenate(sample_data['act']),
-            'adv':np.stack(sample_data['adv']),
-            'vtag':np.stack(sample_data['vtag']),
-            'rews':np.stack(sample_data['rews'])
-        }
         
-
+        advs = np.array(sample_data['adv'])
+        advs= np.concatenate([[adv]*self.elev_num for adv in advs])
+        train_data={
+            'obs':np.stack( sample_data['obs']),
+            'act':np.concatenate(sample_data['act']),
+            'rew': np.array(sample_data['rew']),
+            'adv': advs,
+            'vtag':np.array(sample_data['vtag']) }
 
         return train_data
 
     def set_weights(self,params):
         self.agent.set_weights(params)
-
 

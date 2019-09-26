@@ -22,8 +22,9 @@ class Learner(object):
         mansion_env = Wrapper(mansion_env)
         mansion_env = ActionWrapper(mansion_env)
         mansion_env = ObservationWrapper(mansion_env)
-        self.config['act_dim'] = mansion_env.action_space
-        self.config['obs_shape'] = (mansion_env.observation_space,)
+        self.elev_num = mansion_env.elevator_num
+        self.config['act_dim'] = mansion_env.action_space *self.elev_num
+        self.config['obs_shape'] = (mansion_env.observation_space*self.elev_num,)
         model=MLP(self.config['act_dim'])
         if self.config['algorithm'] =='a2c':
             print("algorithm is a2c .  ") 
@@ -113,9 +114,8 @@ class Learner(object):
             'pi_loss':self.pi_loss_stat.mean,
             'total_loss':self.total_loss_stat.mean,
             'vf_loss':self.vf_loss_stat.mean,
-            'entropy':self.entropy_stat.mean,
-            'lr':self.lr,
-        }
+            'entropy':self.entropy_stat.mean
+                    }
         for key,value in metric.items():
             self.writer.add_scalar(key,value,self.sample_total_steps)
     def should_stop(self):

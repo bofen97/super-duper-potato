@@ -13,7 +13,7 @@ if __name__ == "__main__":
     rs =0.
     for i in range(28800*6):
         #mansion_env.render()
-        acts = learner.agent.predict(mansion_env.state)
+        acts ,_= learner.agent.sample(mansion_env.state)
         acts = [int(a) for a in acts]
         _,r,_,_ = mansion_env.step(acts)
         rs+=r

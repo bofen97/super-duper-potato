@@ -2,31 +2,36 @@ import parl
 from paddle import fluid
 from copy import deepcopy
 from parl.core.fluid.policy_distribution import CategoricalDistribution
+single_elevator_dim = 22
 class a2c(parl.Algorithm):
     def __init__(self,model,config):      
         self.model = model
         self.l2reg = config['l2_reg']
         self.vf_coeff = config['vf_loss_coeff']
+
     def value(self,obs):
         value = self.model.value(obs)
         return value
     def predict(self,obs):
-        logits= self.model.policy(obs)
-        probs = fluid.layers.softmax(logits,axis=1)
-        predict_acts = fluid.layers.argmax(probs,axis=1)
+        predict_logits= self.model.policy(obs)
+        predict_logits = fluid.layers.reshape(predict_logits,[-1,single_elevator_dim]) #only use for liftsim..
+        predict_probs = fluid.layers.softmax(predict_logits,axis=1)
+        predict_acts = fluid.layers.argmax(predict_probs,axis=1)
         return predict_acts
         
         
     def sample(self,obs):
-        logits ,value= self.model.policy_and_value(obs)
-        probs = fluid.layers.softmax(logits,axis=1)
-        sample_acts = fluid.layers.sampling_id(probs)
+        sample_logits ,value= self.model.policy_and_value(obs)
+        sample_logits = fluid.layers.reshape(sample_logits,[-1,single_elevator_dim]) #act dim
+        sample_probs = fluid.layers.softmax(sample_logits,axis=1)
+        sample_acts = fluid.layers.sampling_id(sample_probs)
         return sample_acts,value
+
+
     def learn(self,obs,act,adv,vtag,lr,ent_coeff):
         logits =self.model.policy(obs)
-        
+        logits = fluid.layers.reshape(logits,[-1,single_elevator_dim]) 
         policy_distributions = CategoricalDistribution(logits)
-        
         action_log_probs = policy_distributions.logp(act)
         
         pi_loss = -1.0  * fluid.layers.reduce_sum(action_log_probs * adv)
@@ -66,25 +71,33 @@ class ppo(parl.Algorithm):
         self.model.sync_weights_to(self.old_model)
 
     def value(self,obs):
-        value = self.old_model.value(obs)
+        value = self.model.value(obs)
         return value
     def predict(self,obs):
-        logits = self.old_model.policy(obs)
-        probs = fluid.layers.softmax(logits,axis=1)
-        predict_acts = fluid.layers.argmax(probs,axis=1)
+        predict_logits= self.model.policy(obs)
+        predict_logits = fluid.layers.reshape(predict_logits,[-1,single_elevator_dim]) #only use for liftsim..
+        predict_probs = fluid.layers.softmax(predict_logits,axis=1)
+        predict_acts = fluid.layers.argmax(predict_probs,axis=1)
         return predict_acts
+        
+        
     def sample(self,obs):
-        logits ,value= self.old_model.policy_and_value(obs)
-        probs = fluid.layers.softmax(logits,axis=1)
-        sample_acts = fluid.layers.sampling_id(probs)
+        sample_logits ,value= self.model.policy_and_value(obs)
+        sample_logits = fluid.layers.reshape(sample_logits,[-1,single_elevator_dim]) #act dim
+        sample_probs = fluid.layers.softmax(sample_logits,axis=1)
+        sample_acts = fluid.layers.sampling_id(sample_probs)
         return sample_acts,value
-    
+
     def learn(self,obs,act,adv,vtag,lr,ent_coeff):
         
         
         # calc policy loss 
         logits = self.model.policy(obs)
+        logits = fluid.layers.reshape(logits,[-1,single_elevator_dim]) 
+        
         old_logits = self.old_model.policy(obs)
+        old_logits = fluid.layers.reshape(old_logits,[-1,single_elevator_dim]) 
+        
         old_logits.stop_gradient = True
         policy_distributions = CategoricalDistribution(logits)
         oldpolicy_distributions = CategoricalDistribution(old_logits)

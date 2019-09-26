@@ -18,7 +18,7 @@ config = {
 
     # start learning rate
     'start_lr':1e-5,
-    'l2_reg':1e-4,
+    'l2_reg':0.0,
 
     # coefficient of policy entropy adjustment schedule: (train_step, coefficient)
     'entropy_coeff_scheduler': [(0, -0.01)],
