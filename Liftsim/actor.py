@@ -15,10 +15,10 @@ class Actor(object):
         envs = []
         for id_ in range(self.config['env_num']):
             mansion_env = LiftSim()
+            mansion_env._config._current_time = 3600*2 * 2*id_ 
             mansion_env = Wrapper(mansion_env)
             mansion_env = ActionWrapper(mansion_env)
             mansion_env = ObservationWrapper(mansion_env)
-            mansion_env._config._current_time = 3600*2 * 2*id_ 
             envs.append(mansion_env)
         self.vec_env = VectorEnv(envs)
         self.elev_num = mansion_env.elevator_num
