@@ -14,7 +14,6 @@ if __name__ == "__main__":
     for i in range(28800*6):
         mansion_env.render()
         obs = obs.reshape(1,-1)
-
         acts= learner.agent.predict(obs)
         acts = [int(a) for a in acts]
         obs,r,_,_ = mansion_env.step(acts)
