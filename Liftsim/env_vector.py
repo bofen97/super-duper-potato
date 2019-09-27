@@ -16,7 +16,8 @@ class VectorEnv(object):
     def step(self, actions):
         obs_batch, reward_batch, done_batch, info_batch = [], [], [], []
         for env_id in six.moves.range(self.envs_num):
-            obs, reward, done, info = self.envs[env_id].step(actions[env_id])
+            obs, _, done, info = self.envs[env_id].step(actions[env_id])
+            reward = - (info['time_consume'] + 5e-4 * info['energy_consume'] + 300 * info['given_up_persons']) * 1e-4
             if done:
                 obs = self.envs[env_id].reset()
             obs = obs.reshape(-1,)
