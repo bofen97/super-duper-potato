@@ -2,7 +2,9 @@ from config import config
 from Learner import Learner
 from wrapper import Wrapper,ActionWrapper,ObservationWrapper
 from rlschool import LiftSim
+from tensorboardX import SummaryWriter
 if __name__ == "__main__":
+    writer = SummaryWriter()
     learner = Learner(config)
     learner.agent.restore('./model.ckpt')
     mansion_env = LiftSim()
@@ -17,5 +19,5 @@ if __name__ == "__main__":
         acts= learner.agent.predict(obs)
         acts = [int(a) for a in acts]
         obs,r,_,_ = mansion_env.step(acts)
+        writer.add_scalar(tag='acc. reward',scalar_value=rs,global_step=i)
         rs+=r
-    print(rs)
