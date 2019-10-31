@@ -5,20 +5,21 @@ class MCTS_Search(object):
         self.root = node
     
     def get_action(self):
-        for _ in range(1):
-            self.Search()
+        self.Search()
         _,act = self.root.children_best(0.)
         return act
             
 
     def Search(self):
-        current_node = self.root
+        search_steps = 1000
+        while (search_steps >0):
+            current_node = self.root
+            while  not current_node.is_terminal_node():
+                if not current_node.is_full_expanded():
+                    node =  current_node.expand_node()
+                    node.rollout()
+                    search_steps -= 1
 
-        while  not current_node.is_terminal_node():
-            if not current_node.is_full_expanded():
-                node =  current_node.expand_node()
-                node.rollout()
-
-            else:
-                current_node ,_= current_node.children_best(0.75)
+                else:
+                    current_node ,_= current_node.children_best(0.75)
 
