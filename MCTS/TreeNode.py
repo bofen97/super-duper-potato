@@ -12,7 +12,6 @@ class TreeNode(object):
         self.simulation_state = simul_state
         self._not_visited_actions = None
 
-        self.UPDATE = False
         
         self.children_score_stat = defaultdict(dict)
         self.current_score_stat = defaultdict(int)
@@ -23,14 +22,13 @@ class TreeNode(object):
         
 
         
-        
     def children_best(self,c_param):
         nodes__ = []
         values__ =[]
 
         for node,stat in self.children_score_stat.items():
-            win_times = stat[self.simulation_state.current_player]
-            loses_times = stat['n'] - win_times - stat['tied']
+            win_times = stat["black"]
+            loses_times = stat['n'] - win_times  - stat['tied']
             q = (win_times - loses_times) / stat['n']
 
             q += c_param * np.sqrt((2.*np.log(self.current_score_stat['n'])/stat['n']))
@@ -38,7 +36,7 @@ class TreeNode(object):
             values__.append(q)
         maxinodes = nodes__[np.argmax(values__)]
         maxiaction = self.children_score_stat[maxinodes]['action']
-        return  maxinodes, maxiaction
+        return  maxinodes,maxiaction
 
     @property
     def not_visited_actions(self):

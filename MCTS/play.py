@@ -1,4 +1,4 @@
-from utils import show,check_sequence,show
+from utils import show,check,show
 from Simulation import Move,SimulationState,players
 import numpy as np
 from TreeNode import TreeNode
@@ -6,7 +6,7 @@ from MCTS_Search import MCTS_Search
 
 def play():
     result = None
-    board = np.zeros((15,15))
+    board = np.zeros((3,3))
     while True:
 
         state = SimulationState(board,"black")
@@ -16,7 +16,7 @@ def play():
         board[acts.x,acts.y] =players["black"]
         show(board)
         print("=====================")
-        result = check_sequence(board)
+        result = check(board)
         if result is not None:
             if result =="black":
                 print("==========Black Win !!! ==========")
@@ -30,8 +30,10 @@ def play():
 
 
         
-        x,y = input("enter your x and y  :")
-        board[int(x),int(y)] = players["white"]
+        x= int(input("enter  x  :"))
+        y =int(input("enter y  :"))
+        board[x,y] = players["white"]
+        result = check(board)
         show(board)
         if result is not None:
 

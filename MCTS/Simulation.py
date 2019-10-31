@@ -1,5 +1,5 @@
 import numpy as np
-from utils import check_sequence
+from utils import check
 
 class Move(object):
     def __init__(self,x,y,player):
@@ -31,7 +31,7 @@ class SimulationState(object):
         self.current_player = player
     
     def return_winner(self):
-        return check_sequence(self.board)
+        return check(self.board)
 
 
     def is_game_over(self):
