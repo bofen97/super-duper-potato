@@ -14,32 +14,39 @@ def show(board):
         show_board(board,i)
 
 
-def check(board):
-        row_sum = np.sum(board,0)
-        
-        col_sum = np.sum(board,1)
-        
+
+def BlackWins(board):
+        row_sum = np.sum(board,axis=0)
+        col_sum = np.sum(board,axis=1)
         diag_sum_r = board.trace()
-        
         diag_sum_l = board[::-1].trace()
         
-        black_win = any(row_sum ==board.shape[0])
-        black_win += any(col_sum == board.shape[0])
-        black_win += (diag_sum_l == board.shape[0])
-        black_win += (diag_sum_r == board.shape[0])
+        wins = any(row_sum == board.shape[0])
+        wins += any(col_sum == board.shape[0])
+        wins += (diag_sum_l == board.shape[0])
+        wins += (diag_sum_r == board.shape[0])
+        if wins:
+            return True
+        else:return None
+def WhiteWins(board):
+    row_sum = np.sum(board,axis=0)
+    col_sum = np.sum(board,axis=1)
+    diag_sum_r = board.trace()
+    diag_sum_l = board[::-1].trace()
         
-        if black_win:
-            return "black"
-
-        white_win = any(row_sum == -board.shape[0])
-        white_win += any(col_sum == -board.shape[0])
-        white_win += (diag_sum_l == - board.shape[0])
-        white_win += (diag_sum_r == - board.shape[0])
-        
-        if white_win:
-            return "white"
-        
-        if np.all(board !=0):
-            return "tied"
-        
-        return None
+    wins = any(row_sum == -board.shape[0])
+    wins += any(col_sum == -board.shape[0])
+    wins += (diag_sum_l == -board.shape[0])
+    wins += (diag_sum_r == -board.shape[0])
+    if wins:
+        return True
+    else:return None
+def GameOver(board):
+    if BlackWins(board) is not None:
+        return True
+    elif WhiteWins(board) is not None:
+        return True
+    else:
+        return np.all(board !=0 )
+    
+    

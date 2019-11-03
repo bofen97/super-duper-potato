@@ -1,53 +1,44 @@
-from utils import show,check,show
-from Simulation import Move,SimulationState,players
+from utils import show,BlackWins,WhiteWins,GameOver
+from Simulation import Action,Board
 import numpy as np
-from TreeNode import TreeNode
+from TreeNode import Node
 from MCTS_Search import MCTS_Search
 
 def play():
-    result = None
     board = np.zeros((3,3))
     while True:
-
-        state = SimulationState(board,"black")
-        node = TreeNode(state)
+        
+        state = Board(board,"black")
+        node = Node(state,parent=None)
         mcts = MCTS_Search(node)
-        acts = mcts.get_action()
-        board[acts.x,acts.y] =players["black"]
+        acts = mcts.Search()
+        board[acts.x,acts.y] =1
         show(board)
+        if GameOver(board):
+            if BlackWins(board):
+                return "Black Win !!!"
+            elif WhiteWins(board):
+                return " White Win !!!"
+            else:
+                return "Tide !!!"
         print("=====================")
-        result = check(board)
-        if result is not None:
-            if result =="black":
-                print("==========Black Win !!! ==========")
-                break
-            if result =="white":
-                print("==========White Win !!! ==========")
-                break
-            if result =="tied":
-                print("==========Tied !!! ==========")
-                break
+        
 
 
         
         x= int(input("enter  x  :"))
         y =int(input("enter y  :"))
-        board[x,y] = players["white"]
-        result = check(board)
+        board[x,y] =-1
         show(board)
-        if result is not None:
-
-            if result =="black":
-                print("==========Black Win !!! ==========")
-                break
-            if result =="white":
-                print("==========White Win !!! ==========")
-                break
-            if result =="tied":
-                print("==========Tied !!! ==========")
-                break
+        if GameOver(board):
+            if BlackWins(board):
+                return "Black Win !!!"
+            elif WhiteWins(board):
+                return " White Win !!!"
+            else:
+                return "Tide !!!"
 
 if __name__ == "__main__":
-    play()
+    print(play())
 
 

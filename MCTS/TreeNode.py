@@ -1,92 +1,100 @@
-from collections import defaultdict
 import numpy as np
-from Simulation import Move,SimulationState
-
-class TreeNode(object):
-    def __init__ (self,simul_state,parent = None):
-        assert isinstance(simul_state,SimulationState),"Just SimulationState."
+from collections import defaultdict
+from Simulation import Board
+class Node(object):
+    def __init__(self,Board_State,parent):
+        assert isinstance(Board_State,Board)
         if parent is not None:
-            assert isinstance(parent,TreeNode)
-        
-        self.parent = parent
-        self.simulation_state = simul_state
+            assert isinstance(parent,Node)
         self._not_visited_actions = None
-
+        self.Board_State = Board_State
+        self.parent = parent
         
-        self.children_score_stat = defaultdict(dict)
-        self.current_score_stat = defaultdict(int)
-        self.current_score_stat['n'] = 0.
-        self.current_score_stat['black'] = 0.
-        self.current_score_stat['white'] = 0.
-        self.current_score_stat['tied'] = 0.
         
-
         
-    def children_best(self,c_param):
-        nodes__ = []
-        values__ =[]
-
-        for node,stat in self.children_score_stat.items():
-            win_times = stat["black"]
-            loses_times = stat['n'] - win_times  - stat['tied']
-            q = (win_times - loses_times) / stat['n']
-
-            q += c_param * np.sqrt((2.*np.log(self.current_score_stat['n'])/stat['n']))
-            nodes__.append(node)
-            values__.append(q)
-        maxinodes = nodes__[np.argmax(values__)]
-        maxiaction = self.children_score_stat[maxinodes]['action']
-        return  maxinodes,maxiaction
-
+        self.children = defaultdict(dict)
+        self.current_stat = defaultdict(int)
+        self.current_stat["N"] = 0
+        self.current_stat["BlackWin"] = 0
+    
+    def best_children(self,c):
+        assert c>=0
+        
+        def calc_(c):
+            states = []
+            values = []
+            for child,value in self.children.items():
+                states.append(child)
+                values.append(
+                value["Q"] + c * np.sqrt(np.log(self.current_stat["N"]/value["N"] ))
+                )
+            return states,values
+        
+        
+        if self.Board_State.BlackToPlay():
+            states,values = calc_(c)
+            max_node = states[np.argmax(values)]
+            max_action = self.children[max_node]["action"]
+            return max_node,max_action
+        else:
+            states,values = calc_(-1.0* c)
+            max_node = states[np.argmax(values)]
+            max_action = self.children[max_node]["action"]
+            return max_node,max_action
+            
+            
+            
+        
+        
+        
+    
     @property
     def not_visited_actions(self):
-        
         if self._not_visited_actions is None:
-            self._not_visited_actions = self.simulation_state.get_legal_actions()
+            self._not_visited_actions = self.Board_State.Legal()
         return self._not_visited_actions
     def expand_node(self):
         action = self.not_visited_actions.pop()
-        child_state = self.simulation_state.move(action)
-        child_node = TreeNode(simul_state=child_state,parent=self)        
-        self.children_score_stat[child_node]['black'] = 0.
-        self.children_score_stat[child_node]['tied'] = 0.
-        self.children_score_stat[child_node]['white'] = 0.
-        self.children_score_stat[child_node]['n'] = 0.
-        self.children_score_stat[child_node]['action'] = action
+        child_state = self.Board_State.Play(action)
+        child_node = Node(child_state,self)
+        self.children[child_node]["N"] = 0
+        self.children[child_node]["BlackWin"] = 0
+        self.children[child_node]["Q"] = 0
+        self.children[child_node]["action"] = action
         return child_node
+    def BackUp(self,BlackWin):
+        if BlackWin:
+            self.current_stat["BlackWin"] += 1
+        self.current_stat["N"] += 1
+        
+        self.current_stat["Q"] = self.current_stat["BlackWin"]/self.current_stat["N"]
+        
+        if self.parent:
+            self.parent.BackUp(BlackWin)
+            self.parent.children[self]["N"] =self.current_stat["N"]
+            self.parent.children[self]["BlackWin"] = self.current_stat["BlackWin"]
+            self.parent.children[self]["Q"] = self.current_stat["Q"]
+    
+    
     def is_terminal_node(self):
-        return self.simulation_state.is_game_over()
-    
-    def rollout(self):
-        current_state = self.simulation_state
-        while not current_state.is_game_over():
-            possible_moves = current_state.get_legal_actions()
-            action = self.rollout_policy(possible_moves)
-            current_state = current_state.move(action)
-        simulation_result = current_state.return_winner()
-        self.BackUp(simulation_result)
-        
-        
-
-    def BackUp(self,simulation_result):
-
-        self.current_score_stat[simulation_result] += 1.
-        self.current_score_stat['n'] += 1.
-        if self.parent is not None:
-            self.parent.BackUp(simulation_result)
-            self.parent.children_score_stat[self]['n'] = self.current_score_stat['n']
-            self.parent.children_score_stat[self][simulation_result] = self.current_score_stat[simulation_result]
-
-
-
-
-        
-            
-    def rollout_policy(self,possible_moves):
-        random_index = np.random.randint(low=0,high = len(possible_moves))
-        return possible_moves[random_index]
-    
-            
-            
+        return self.Board_State.GameOver()
     def is_full_expanded(self):
         return len(self.not_visited_actions) == 0
+    
+    
+    def rollout_policy(self,possible_moves):
+        
+        random_index = np.random.randint(low=0,high = len(possible_moves))
+        return possible_moves[random_index]
+        
+    def rollout(self):
+        current_state = self.Board_State
+        while not current_state.GameOver():
+            all_actions = current_state.Legal()
+            action = self.rollout_policy(all_actions)
+            current_state = current_state.Play(action)
+        if current_state.BlackWins():
+            self.BackUp(True)
+        else:
+            self.BackUp(False)
+    
