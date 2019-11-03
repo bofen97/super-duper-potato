@@ -5,7 +5,7 @@ from TreeNode import Node
 from MCTS_Search import MCTS_Search
 
 def play():
-    board = np.zeros((3,3))
+    board = np.zeros((5,5))
     while True:
         
         state = Board(board,"black")
