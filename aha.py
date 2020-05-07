@@ -6,13 +6,13 @@ def truth_state(X_k):
     var = 0.1
     noise = np.random.normal(loc = 0.,scale=var)
     
-    return X_k + 2.*noise
+    return X_k + noise 
 
 def measurements(X_k):
     var = 0.5
     noise = np.random.normal(loc = 0.,scale=var)
     
-    return X_k + 4.*noise
+    return X_k + noise
     
     
 
@@ -43,9 +43,7 @@ def clac_Xk_priori(Xk_posteriori):
 
 
 def clac_Sk_priori(Sk_posteriori):
-    var = 0.1
-    noise = noise = np.random.normal(loc = 0.,scale=var)
-    return Sk_posteriori + var
+    return Sk_posteriori + 0.1 ** 2
 
 
 
@@ -55,12 +53,12 @@ def main():
     catches['truth_xk'] = []
     catches['posteriori_xk'] = []
     catches['measurements'] = []
-    
+    catches['error'] = []
     initial_X,initial_S = initial_condition()
     priori_Sk = np.random.normal(loc = 0.,scale=1.)
     priori_Xk = np.random.normal(loc = 0.,scale=1.)
     truth_Xk = np.copy(initial_X)
-    while k<200:
+    while k<50:
         catches['truth_xk'].append(truth_Xk)
         
         Zk = measurements(truth_Xk)
@@ -75,19 +73,19 @@ def main():
         priori_Sk = clac_Sk_priori(posteriori_Sk)
         
         truth_Xk = truth_state(truth_Xk)
+        catches['error'].append(np.abs(truth_Xk - posteriori_Xk))
         k=k+1
     return catches
     
     
 dic = main()
 plt.legend(loc = 'upper right')
-plt.plot(dic['truth_xk'],color = 'red' ,label= "truth_xk")
+plt.plot(dic['truth_xk'],color = 'blue' ,label= "truth_xk")
 plt.plot(dic['posteriori_xk'],color = 'green',linestyle = '-', label ="predict ")
 plt.plot(dic['measurements'],color = 'pink', linestyle = '--',label = "measurements")
+plt.plot(dic['error'],color = 'black',label = "error")
+
 plt.show()
     
     
     
-    
-
-
